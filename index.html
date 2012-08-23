@@ -1,0 +1,71 @@
+<script src="/socket.io/socket.io.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
+<script>
+  var socket = io.connect('http://localhost:8080');
+  socket.on('connect', function() {
+    //socket.emit('adduser', prompt('Enter username'));
+  });
+
+  socket.on('updatechat', function(username, data) {
+    $('#conversation').append('<b>' + username + ':</b> ' + data + '<br>');
+  });
+
+  socket.on('updateusers', function(data) {
+    $('#users').empty();
+    $.each(data, function(key, value) {
+      $('#users').append('<div>' + key + '</div>');
+    });
+  });
+
+  socket.on('sameusername', function() {
+  	$('.error').remove();
+  	$('#enterbutton').after('<p>This username has been taken.</p>');
+  })
+
+  socket.on('chatstart', function() {  	
+    	$('#usernamepanel').hide();
+    	$('#chatpanel').show();
+  });
+
+  $(function() {
+    $('#datasend').click(function() {
+      var message = $('#data').val();
+      $('#data').val('');
+      socket.emit('sendchat', message);
+    });
+
+    $('#data').keypress(function(e) {
+      if(e.which == 13) {
+        $(this).blur();
+        $('#datasend').focus().click();
+      }
+    });
+
+    $('#enterbutton').click(function() {
+    	socket.emit('adduser', $('#username').val());
+    });
+  });
+    $('#data').keypress(function(e) {
+        if(e.which == 13) {
+             $(this).blur();
+             $('#datasend').focus().click();
+         } 
+      });                                                                                                                             
+  
+  </script>
+<div id="usernamepanel" align="center" style="margin-top: %20;">
+	<label>Enter a username</label>
+	<input type="text" id="username" />
+	<input type="button" id="enterbutton" value="Send" />
+</div>
+<div id="chatpanel" style="display:none">
+	 <div style="float:left;width:100px;border-right:1px solid black;height:300px;padding:10px;overflow:scroll-y;">
+	        <b>USERS</b>
+	        <div id="users"></div>
+	</div>
+	<div style="float:left;width:300px;height:250px;overflow:scroll-y;padding:10px;">
+	        <input id="data" style="width:200px;" />
+	        <input type="button" id="datasend" value="send" />
+	        <div id="conversation"></div>
+	</div>
+</div>
